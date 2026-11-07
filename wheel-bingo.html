@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<meta name="squeekchain-project" content="7cf97d31-9f0c-4f1c-8964-06e914eafe5b">
+<link rel="icon" href="data:," />
+<title>SqueekBingo — Squeekchain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF7E8; --bg2:#FFEDC9; --surface:#FFFFFF; --surface2:#FFF1D6;
+    --ink:#2B1D0E; --ink2:#6B5636; --line:#EAD9B8;
+    --orange:#E85D26; --orange-d:#C94A18; --teal:#0F766E; --teal-bg:#CCFBF1;
+    --gold:#E9A426; --gold-bg:#FEF3C7; --red:#DC2626; --red-bg:#FEE2E2;
+    --marked:#E85D26; --avail:#0F766E;
+    --shadow:0 10px 30px rgba(43,29,14,.10);
+    --radius:18px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#191008; --bg2:#241708; --surface:#2A1D0E; --surface2:#332412;
+      --ink:#FFF3DC; --ink2:#CBB488; --line:#4A3517;
+      --teal-bg:#134E4A; --gold-bg:#451A03; --red-bg:#450A0A; --shadow:0 10px 30px rgba(0,0,0,.45);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Plus Jakarta Sans",system-ui,sans-serif;
+    background:var(--bg); color:var(--ink);
+    background-image:radial-gradient(720px 360px at 15% -5%, var(--bg2), transparent 65%);
+    min-height:100vh;
+  }
+  a{color:var(--orange-d);font-weight:700}
+  @media (prefers-color-scheme: dark){ a{color:#FDBA74} }
+  .wrap{max-width:1120px;margin:0 auto;padding:20px 16px 48px}
+
+  /* HEADER */
+  .top{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;padding:10px 0 18px;border-bottom:2px dashed var(--line)}
+  .top h1{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(38px,6vw,58px);line-height:.95;margin:0;letter-spacing:-.02em}
+  .top h1 span{color:var(--orange)}
+  .top p{margin:8px 0 0;color:var(--ink2);font-size:15px;line-height:1.55;max-width:520px}
+  .top .byline{margin:10px 0 0;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+  .top .byline strong{color:var(--orange-d);font-size:15px;text-transform:none;letter-spacing:0}
+  @media (prefers-color-scheme: dark){.top .byline strong{color:#FDBA74}}
+  .badge-link{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--bg);text-decoration:none;padding:10px 14px;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap}
+  .badge-link i{width:8px;height:8px;background:#4ADE80;border-radius:50%;display:inline-block;flex:none}
+
+  /* CONNECTION BAR */
+  .connbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+  .pill{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:6px 12px;border:1px solid var(--line)}
+  .pill i{width:9px;height:9px;border-radius:50%;background:var(--gold);display:inline-block;flex:none}
+  .pill.live{color:var(--teal);border-color:var(--teal)}
+  .pill.live i{background:#22C55E;animation:blink 1.6s ease-in-out infinite}
+  .pill.offline{color:var(--red);border-color:var(--red)}
+  .pill.offline i{background:var(--red);animation:none}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+  .connbar .ctext{font-size:13px;color:var(--ink2);line-height:1.45}
+  .connbar .ctext code{font-size:12px;background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+  .offline-box{display:none;margin-top:12px;background:var(--red-bg);border:1px solid var(--red);border-radius:14px;padding:12px 14px;font-size:13.5px;line-height:1.55}
+  .offline-box.show{display:block}
+  .offline-box strong{color:var(--red)}
+  .check-btn{margin-left:auto;font-size:12.5px;font-weight:800;border:1px solid var(--ink);background:var(--ink);color:var(--bg);border-radius:999px;padding:8px 14px;cursor:pointer;font-family:inherit;white-space:nowrap;flex:none}
+  .check-btn:active{transform:scale(.97)}
+  .connbar .age{font-size:12px;color:var(--ink2);font-weight:700}
+  .connbar .age.stale{color:var(--red)}
+  .check-line{margin-top:10px;font-size:13px;color:var(--ink2);line-height:1.55;background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:9px 12px}
+  .check-line code{font-size:12px;background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+  .check-line strong.ok{color:var(--teal)} .check-line strong.bad{color:var(--red)}
+
+  /* STATS */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 18px}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+  .stat b{font-family:"Fraunces",serif;font-size:26px;display:block;line-height:1}
+  .stat span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);font-weight:700}
+  @media(max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+  /* LAYOUT */
+  .layout{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:start}
+  @media(max-width:860px){.layout{grid-template-columns:1fr}}
+
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+  .panel h2{font-family:"Fraunces",serif;font-size:20px;margin:0 0 4px}
+  .panel .sub{color:var(--ink2);font-size:13px;margin:0 0 14px;line-height:1.5}
+
+  /* BINGO CARD */
+  .bingo-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .letters{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;text-align:center;font-family:"Fraunces",serif;font-weight:900;font-size:20px;margin-bottom:8px}
+  .letters span:nth-child(1){color:#E85D26}.letters span:nth-child(2){color:#0F766E}.letters span:nth-child(3){color:#B45309}.letters span:nth-child(4){color:#7C3AED}.letters span:nth-child(5){color:#DB2777}
+  .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .cell{
+    aspect-ratio:1;border:2px solid var(--line);background:var(--surface2);border-radius:14px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+    padding:6px 4px;cursor:default;position:relative;transition:transform .15s, background .2s, border-color .2s;
+    -webkit-tap-highlight-color:transparent;user-select:none;
+  }
+  .cell .ic{font-size:20px;line-height:1;margin-bottom:4px}
+  .cell .tx{font-size:11px;font-weight:800;line-height:1.2;letter-spacing:-.01em}
+  @media(max-width:480px){.cell .ic{font-size:16px}.cell .tx{font-size:9.5px}.grid{gap:6px}.letters{gap:6px}}
+  .cell.free{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .cell.free .tx{font-size:12px}
+  .cell.avail{border-color:var(--avail);background:var(--teal-bg);cursor:pointer;animation:pulse 1.1s ease-in-out infinite}
+  .cell.avail:hover{transform:scale(1.04)}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(15,118,110,.35)}50%{box-shadow:0 0 0 6px rgba(15,118,110,0)}}
+  .cell.marked{background:var(--marked);border-color:var(--orange-d);color:#fff;cursor:default;animation:none}
+  .cell.marked::after{content:"✓";position:absolute;top:4px;right:7px;font-size:11px;font-weight:900;opacity:.9}
+  .cell.win{background:var(--gold);border-color:#B45309;color:#451A03}
+  .hint{margin-top:12px;background:var(--gold-bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.5}
+  .hint strong{color:var(--orange-d)}
+  @media (prefers-color-scheme: dark){.hint strong{color:#FDBA74}}
+
+  /* LIVE WHEEL PANEL */
+  .wheel-wrap{display:flex;flex-direction:column;align-items:center;text-align:center}
+  .wheel-outer{position:relative;width:230px;height:230px;flex:none}
+  .pointer{position:absolute;top:-6px;left:50%;transform:translateX(-50%);z-index:3;width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:22px solid var(--ink)}
+  .wheel{
+    width:230px;height:230px;border-radius:50%;border:10px solid var(--ink);
+    background:conic-gradient(#E85D26 0 45deg,#F2B134 45deg 90deg,#0F766E 90deg 135deg,#F97316 135deg 180deg,#84CC16 180deg 225deg,#E85D26 225deg 270deg,#F2B134 270deg 315deg,#0F766E 315deg 360deg);
+    transition:transform 1.2s cubic-bezier(.2,.7,.3,1);position:relative;
+    box-shadow:inset 0 0 0 4px rgba(255,255,255,.35), 0 14px 28px rgba(0,0,0,.18);
+  }
+  .wheel::after{content:"";position:absolute;inset:26px;border-radius:50%;border:2px dashed rgba(255,255,255,.55)}
+  .hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:86px;height:86px;background:var(--surface);border:3px solid var(--ink);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;padding:4px}
+  .hub .ham{font-size:28px;line-height:1}
+  .hub small{font-size:9px;font-weight:800;letter-spacing:.08em;color:var(--ink2);text-align:center}
+  .hub small.run{color:var(--teal)}
+  .tele{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-top:16px;text-align:left}
+  .tele .t{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:9px 11px;min-width:0}
+  .tele .t.wide{grid-column:1/-1}
+  .tele .t span{display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);font-weight:800}
+  .tele .t b{font-size:16px;font-weight:800;line-height:1.3;overflow-wrap:anywhere}
+  .tele .t small{display:block;font-size:11px;color:var(--ink2);line-height:1.35}
+  .draw-box{width:100%;margin-top:14px;background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:14px;min-height:86px;display:flex;flex-direction:column;justify-content:center}
+  .draw-box .lbl{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2);font-weight:800}
+  .draw-box .ev{font-family:"Fraunces",serif;font-size:22px;font-weight:900;margin:3px 0 2px}
+  .draw-box .ds{font-size:13px;color:var(--ink2);line-height:1.45}
+  .btns{display:flex;gap:10px;width:100%;margin-top:14px;flex-wrap:wrap}
+  .btn{flex:1;min-width:130px;border:0;border-radius:999px;padding:15px 18px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;transition:transform .12s, opacity .2s}
+  .btn:active{transform:scale(.97)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn-primary{background:var(--orange);color:#fff;box-shadow:0 8px 20px rgba(232,93,38,.35)}
+  .mini-row{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+  .mini{font-size:12px;font-weight:700;border:1px solid var(--line);background:var(--surface);color:var(--ink2);border-radius:999px;padding:7px 12px;cursor:pointer;font-family:inherit}
+  .mini.on{color:var(--ink);border-color:var(--ink)}
+
+  /* FEED */
+  .feed-panel{margin-top:18px}
+  .feed{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-size:12px;font-weight:700;padding:7px 11px;border-radius:999px;background:var(--surface2);border:1px solid var(--line)}
+  .chip.latest{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .chip.oncard{border-color:var(--avail);color:var(--avail)}
+  .empty{color:var(--ink2);font-size:13px}
+
+  /* WIN BANNER */
+  .win{display:none;margin-top:18px;background:var(--ink);color:var(--bg);border-radius:var(--radius);padding:22px;text-align:center;position:relative;overflow:hidden}
+  .win.show{display:block}
+  .win h3{font-family:"Fraunces",serif;font-size:36px;margin:0 0 6px;color:#FDBA74}
+  .win p{margin:0 auto 14px;max-width:480px;line-height:1.55;font-size:14px;opacity:.9}
+  .win .btn{flex:none;background:#FDBA74;color:#451A03;min-width:180px}
+  .confetti{position:absolute;width:8px;height:14px;top:-16px;border-radius:2px;animation:fall linear forwards;pointer-events:none}
+  @keyframes fall{to{transform:translateY(260px) rotate(560deg);opacity:0}}
+  @media (prefers-reduced-motion: reduce){.cell.avail{animation:none}.wheel{transition:none}.confetti{display:none}.pill.live i{animation:none}}
+
+  /* HOW */
+  .how{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+  @media(max-width:760px){.how{grid-template-columns:1fr}}
+  .step{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .step b{font-family:"Fraunces",serif;font-size:15px;display:block;margin-bottom:5px}
+  .step b em{font-style:normal;color:var(--orange)}
+  .step p{margin:0;font-size:13px;color:var(--ink2);line-height:1.55}
+
+  footer{margin-top:26px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;font-size:12.5px;color:var(--ink2);line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <h1>Squeek<span>Bingo</span> 🐹</h1>
+      <p>A solo 5×5 bingo game powered by the real Squeekchain hamster wheel. Live wheel events check squares off your card — complete one line to call BINGO.</p>
+    </div>
+    <a class="badge-link" href="https://squeekchain.com/genesis/code" target="_blank" rel="noopener"><i></i> Project for the “The Buildooooor” badge →</a>
+  </header>
+
+  <div class="connbar" role="status" aria-live="polite">
+    <span class="pill" id="connPill"><i></i><span id="connPillText">Connecting</span></span>
+    <span class="ctext" id="connText">Contacting <code>api.squeekchain.com/v1/status</code> — the game polls the live wheel every 5 seconds.</span>
+    <span class="age" id="connAge"></span>
+    <button class="check-btn" id="btnCheck" type="button">Check connection</button>
+  </div>
+  <div class="check-line" id="checkLine"><strong>How to tell live from offline:</strong> green <strong>LIVE</strong> above plus a “last update” time only a few seconds old = connected. Red <strong>OFFLINE</strong> = the API can't be reached from this device. Press <strong>Check connection</strong> to test it right now.</div>
+  <div class="offline-box" id="offlineBox">
+    <strong>Offline — no live data.</strong> The Squeekchain API can't be reached right now, so no new events will fire and nothing on your card will change. This game never falls back to simulated data. It keeps retrying every 5 seconds and picks up automatically when the API responds again. Press <strong>Check connection</strong> above to test it on demand.
+  </div>
+
+  <section class="stats" aria-label="Game statistics">
+    <div class="stat"><span>Live events</span><b id="stDraws">0</b></div>
+    <div class="stat"><span>Marked</span><b id="stMarked">1 / 25</b></div>
+    <div class="stat"><span>Score</span><b id="stScore">0</b></div>
+    <div class="stat"><span>Bingos won</span><b id="stBingo">0</b></div>
+  </section>
+
+  <div class="layout">
+    <!-- CARD -->
+    <section class="panel" aria-label="Bingo card">
+      <div class="bingo-head">
+        <div>
+          <h2>Your Card</h2>
+          <p class="sub" style="margin:0">Squares light up when the matching live event really happens on the wheel.</p>
+        </div>
+        <strong id="cardNo" style="font-family:'Fraunces',serif;font-size:15px;white-space:nowrap">#001</strong>
+      </div>
+      <div class="letters" aria-hidden="true"><span>B</span><span>I</span><span>N</span><span>G</span><span>O</span></div>
+      <div class="grid" id="grid" role="grid" aria-label="Bingo board, 5 by 5"></div>
+      <div class="hint" id="hint">🎯 <strong>Waiting for live data:</strong> once the wheel feed connects, real events — the hamster starting a run, RPM crossing a threshold, a round settling — will light up squares on your card.</div>
+    </section>
+
+    <!-- LIVE WHEEL -->
+    <section class="panel" aria-label="Live wheel data">
+      <h2>Live Wheel</h2>
+      <p class="sub">Real telemetry from the Squeekchain hamster wheel, refreshed every 5 seconds from <code>api.squeekchain.com/v1/status</code>. The wheel graphic turns as the real <em>distanceMm</em> counter grows. No simulated draws — every bingo event below is detected from a genuine change in this data.</p>
+      <div class="wheel-wrap">
+        <div class="wheel-outer">
+          <div class="pointer"></div>
+          <div class="wheel" id="wheel"></div>
+          <div class="hub"><span class="ham">🐹</span><small id="hubStatus">CONNECTING</small></div>
+        </div>
+        <div class="tele" aria-label="Live telemetry">
+          <div class="t"><span>Wheel status · coreStatus</span><b id="tStatus">—</b></div>
+          <div class="t"><span>RPM · rpmMilli</span><b id="tRpm">—</b></div>
+          <div class="t"><span>Speed · speedMmPerSecond</span><b id="tSpeed">—</b></div>
+          <div class="t"><span>Distance · distanceMm</span><b id="tDist">—</b></div>
+          <div class="t"><span>Total work · cumulativeWorkUnits</span><b id="tWork">—</b></div>
+          <div class="t"><span>Block height · anchor.blockHeight</span><b id="tBlock">—</b></div>
+          <div class="t"><span>Settled through round · settledThroughRound</span><b id="tSettled">—</b></div>
+          <div class="t"><span>Oracle · latestClosure</span><b id="tClosure">—</b><small id="tClosureAt"></small></div>
+          <div class="t wide"><span>Wheel data freshness · measurement.observedAt</span><b id="tFresh">—</b><small id="tFreshSub"></small></div>
+        </div>
+        <div class="draw-box" aria-live="polite">
+          <span class="lbl" id="drawLbl">Latest live event</span>
+          <div class="ev" id="drawEv">Waiting for the wheel…</div>
+          <div class="ds" id="drawDs">No live event yet on this card. Events fire only when the real data changes — a run starting, RPM or speed crossing a threshold, work hitting a milestone, a new block, a settled round, or a fresh oracle closure.</div>
+        </div>
+        <div class="btns">
+          <button class="btn btn-primary" id="btnNew" type="button">New Card</button>
+        </div>
+        <div class="mini-row">
+          <button class="mini on" id="btnSound" type="button">🔊 Sound: On</button>
+          <button class="mini on" id="btnAuto" type="button">Auto-mark: On</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- WIN -->
+  <section class="win" id="winBox" aria-live="polite">
+    <h3>🎉 BINGO!</h3>
+    <p id="winText">You completed a line!</p>
+    <button class="btn" id="btnAgain" type="button">Play a New Card</button>
+  </section>
+
+  <!-- FEED -->
+  <section class="panel feed-panel" aria-label="Live event history">
+    <h2>Live Event History</h2>
+    <p class="sub">Real wheel events detected on this card, newest first. A green outline means that event is on your card.</p>
+    <div class="feed" id="feed"><span class="empty">No live events yet. They appear here the moment the real wheel data triggers one.</span></div>
+  </section>
+
+  <section class="how" aria-label="How to play">
+    <article class="step"><b><em>1.</em> Watch the live wheel</b><p>The game polls the Squeekchain status API every 5 seconds. Your card holds 24 real wheel events — run starts and stops, RPM and speed thresholds, work and distance milestones, new blocks, settled rounds, and oracle closures.</p></article>
+    <article class="step"><b><em>2.</em> Events mark your card</b><p>When an event genuinely happens — say <em>settledThroughRound</em> ticks up or the hamster starts running — its square lights up. With auto-mark on it is stamped for you; turn auto-mark off to tap glowing squares yourself. The center square is free: SQUEEK!</p></article>
+    <article class="step"><b><em>3.</em> Complete a line = BINGO</b><p>Fill 5 squares in a row — across, down, or diagonal — to win. Fewer live events to bingo means a bigger score bonus. A full card earns an extra bonus. If the API goes offline, the game says so honestly and pauses — it never invents events.</p></article>
+  </section>
+
+  <footer>
+    <span><strong>SqueekBingo</strong> — a game project for Squeekchain Genesis, built for submission to the Builder badge “The Buildooooor”. Live data: api.squeekchain.com/v1/status, polled every 5 seconds.</span>
+    <span>Submit a project: <a href="https://squeekchain.com/genesis/code" target="_blank" rel="noopener">squeekchain.com/genesis/code</a> · Solo play, no wallet &amp; no cost.</span>
+  </footer>
+</div>
+<script>
+(function(){
+  var API_URL='https://api.squeekchain.com/v1/status';
+  var POLL_MS=5000;
+
+  function cross(key,field){return function(c){return c.prev&&c.prev[field]<key&&c.curr[field]>=key;};}
+  function mult(key,field,step){return function(c){return c.prev&&Math.floor(c.curr[field]/step)>Math.floor(c.prev[field]/step);};}
+
+  var DEFS=[
+    {k:'start', s:'Starts Running', f:'Hamster Starts Running', i:'▶️',
+     d:function(c){return 'coreStatus flipped from IDLE to RUNNING — the hamster is on the wheel.';},
+     test:function(c){return c.prev&&c.prev.status==='IDLE'&&c.curr.status==='RUNNING';}},
+    {k:'stop', s:'Stops Running', f:'Hamster Stops Running', i:'⏸️',
+     d:function(c){return 'coreStatus flipped from RUNNING to IDLE — the hamster is taking a break.';},
+     test:function(c){return c.prev&&c.prev.status==='RUNNING'&&c.curr.status==='IDLE';}},
+    {k:'rpm10', s:'RPM Over 10', f:'RPM Crosses 10', i:'⚡',
+     d:function(c){return 'Wheel speed reached '+c.curr.rpm.toFixed(1)+' RPM (rpmMilli '+c.curr.rpmMilli+').';},
+     test:cross(10,'rpm')},
+    {k:'rpm30', s:'RPM Over 30', f:'RPM Crosses 30', i:'💨',
+     d:function(c){return 'Wheel speed reached '+c.curr.rpm.toFixed(1)+' RPM (rpmMilli '+c.curr.rpmMilli+').';},
+     test:cross(30,'rpm')},
+    {k:'rpm60', s:'RPM Over 60', f:'RPM Crosses 60', i:'🔥',
+     d:function(c){return 'Wheel speed reached '+c.curr.rpm.toFixed(1)+' RPM — properly fast now.';},
+     test:cross(60,'rpm')},
+    {k:'rpm100', s:'RPM Over 100', f:'RPM Crosses 100', i:'🚀',
+     d:function(c){return 'Wheel speed reached '+c.curr.rpm.toFixed(1)+' RPM. That is a serious sprint.';},
+     test:cross(100,'rpm')},
+    {k:'spd150', s:'Speed 150+', f:'Speed Crosses 150 mm/s', i:'🏃',
+     d:function(c){return 'speedMmPerSecond reached '+c.curr.speed+' mm/s.';},
+     test:cross(150,'speed')},
+    {k:'spd400', s:'Speed 400+', f:'Speed Crosses 400 mm/s', i:'🌪️',
+     d:function(c){return 'speedMmPerSecond reached '+c.curr.speed+' mm/s.';},
+     test:cross(400,'speed')},
+    {k:'spd800', s:'Speed 800+', f:'Speed Crosses 800 mm/s', i:'☄️',
+     d:function(c){return 'speedMmPerSecond reached '+c.curr.speed+' mm/s — flying.';},
+     test:cross(800,'speed')},
+    {k:'spd1200', s:'Speed 1200+', f:'Speed Crosses 1200 mm/s', i:'⚡',
+     d:function(c){return 'speedMmPerSecond reached '+c.curr.speed+' mm/s. Top-end hamster pace.';},
+     test:cross(1200,'speed')},
+    {k:'surge', s:'RPM Surge +25', f:'RPM Surges by 25+', i:'📈',
+     d:function(c){return 'RPM jumped from '+c.prev.rpm.toFixed(1)+' to '+c.curr.rpm.toFixed(1)+' between polls.';},
+     test:function(c){return c.prev&&(c.curr.rpm-c.prev.rpm)>=25;}},
+    {k:'wind', s:'Second Wind', f:'Second Wind — Second Run Starts', i:'🔄',
+     d:function(c){return 'The hamster started running for the second time on this card.';},
+     test:function(c){return c.starts>=2&&c.prev&&c.prev.status==='IDLE'&&c.curr.status==='RUNNING';}},
+    {k:'run30', s:'Runs 30 s', f:'Runs for 30 Seconds Straight', i:'⏱️',
+     d:function(c){return 'coreStatus stayed RUNNING for a full 30 seconds of live observation.';},
+     test:function(c){return c.runSecs>=30;}},
+    {k:'idle60', s:'Rests 1 Min', f:'Rests for a Full Minute', i:'😴',
+     d:function(c){return 'coreStatus stayed IDLE for a full 60 seconds of live observation — a proper rest.';},
+     test:function(c){return c.idleSecs>=60;}},
+    {k:'block1', s:'New Block', f:'New Block Height', i:'🧱',
+     d:function(c){return 'builder.anchor.blockHeight rose to '+c.curr.block+'.';},
+     test:function(c){return c.prev&&c.curr.block>c.prev.block;}},
+    {k:'block5', s:'Blocks +5', f:'Block Height Up by 5', i:'🏗️',
+     d:function(c){return 'Block height is now '+c.curr.block+', five above where this card started ('+c.base.block+').';},
+     test:function(c){return c.base&&(c.curr.block-c.base.block)>=5;}},
+    {k:'block100', s:'Block ×100', f:'Block Height Hits a ×100 Milestone', i:'🎯',
+     d:function(c){return 'Block height crossed a hundred mark, now at '+c.curr.block+'.';},
+     test:mult(0,'block',100)},
+    {k:'round1', s:'Round Settled', f:'A Round Settles', i:'✅',
+     d:function(c){return 'builder.anchor.settledThroughRound rose to '+c.curr.settled+'.';},
+     test:function(c){return c.prev&&c.curr.settled>c.prev.settled;}},
+    {k:'round3', s:'3 Rounds Done', f:'Three Rounds Settled on This Card', i:'🏆',
+     d:function(c){return 'Three rounds have settled since this card started — settledThroughRound is now '+c.curr.settled+'.';},
+     test:function(c){return c.base&&(c.curr.settled-c.base.settled)>=3;}},
+    {k:'round10', s:'Round ×10', f:'Settled Round Hits a ×10 Milestone', i:'🔟',
+     d:function(c){return 'settledThroughRound crossed a ten mark, now at '+c.curr.settled+'.';},
+     test:mult(0,'settled',10)},
+    {k:'oracle', s:'Oracle Closure', f:'New Oracle Closure', i:'🔮',
+     d:function(c){return 'oracle.latestClosure changed — latest closed round is now '+c.curr.closureLast+'.';},
+     test:function(c){return c.prev&&c.prev.closureSig&&c.curr.closureSig&&c.curr.closureSig!==c.prev.closureSig;}},
+    {k:'work100m', s:'Work ×100', f:'Total Work Hits a ×100 Milestone', i:'💪',
+     d:function(c){return 'cumulativeWorkUnits crossed a hundred mark, now at '+c.curr.work+'.';},
+     test:mult(0,'work',100)},
+    {k:'work250m', s:'Work ×250', f:'Total Work Hits a ×250 Milestone', i:'🏋️',
+     d:function(c){return 'cumulativeWorkUnits crossed a 250 mark, now at '+c.curr.work+'.';},
+     test:mult(0,'work',250)},
+    {k:'work500m', s:'Work ×500', f:'Total Work Hits a ×500 Milestone', i:'🥇',
+     d:function(c){return 'cumulativeWorkUnits crossed a 500 mark, now at '+c.curr.work+'.';},
+     test:mult(0,'work',500)},
+    {k:'work25', s:'Work +25', f:'Work Up by 25 on This Card', i:'🔋',
+     d:function(c){return 'The wheel has produced 25 work since this card started — cumulativeWorkUnits is now '+c.curr.work+'.';},
+     test:function(c){return c.base&&(c.curr.work-c.base.work)>=25;}},
+    {k:'work100', s:'Work +100', f:'Work Up by 100 on This Card', i:'⚙️',
+     d:function(c){return 'The wheel has produced 100 work since this card started — cumulativeWorkUnits is now '+c.curr.work+'.';},
+     test:function(c){return c.base&&(c.curr.work-c.base.work)>=100;}},
+    {k:'dist10', s:'Distance +10 m', f:'Distance Up by 10 m on This Card', i:'🛞',
+     d:function(c){return 'distanceMm has grown by 10 metres since this card started — now '+(c.curr.dist/1000000).toFixed(3)+' km all-time.';},
+     test:function(c){return c.base&&(c.curr.dist-c.base.dist)>=10000;}},
+    {k:'dist50', s:'Distance +50 m', f:'Distance Up by 50 m on This Card', i:'🗺️',
+     d:function(c){return 'distanceMm has grown by 50 metres since this card started — now '+(c.curr.dist/1000000).toFixed(3)+' km all-time.';},
+     test:function(c){return c.base&&(c.curr.dist-c.base.dist)>=50000;}},
+    {k:'dist100', s:'Distance +100 m', f:'Distance Up by 100 m on This Card', i:'🏅',
+     d:function(c){return 'distanceMm has grown by 100 metres since this card started — now '+(c.curr.dist/1000000).toFixed(3)+' km all-time.';},
+     test:function(c){return c.base&&(c.curr.dist-c.base.dist)>=100000;}},
+    {k:'distKm', s:'Distance ×1 km', f:'All-Time Distance Hits a ×1 km Milestone', i:'🌍',
+     d:function(c){return 'distanceMm crossed a whole-kilometre mark — now '+(c.curr.dist/1000000).toFixed(3)+' km.';},
+     test:mult(0,'dist',1000000)}
+  ];
+  var DEF={}; DEFS.forEach(function(d){DEF[d.k]=d;});
+
+  var LINES=[];
+  (function(){var r,c;
+    for(r=0;r<5;r++){var row=[];for(c=0;c<5;c++)row.push(r*5+c);LINES.push(row);}
+    for(c=0;c<5;c++){var col=[];for(r=0;r<5;r++)col.push(r*5+c);LINES.push(col);}
+    LINES.push([0,6,12,18,24]);LINES.push([4,8,12,16,20]);
+  })();
+
+  var grid=document.getElementById('grid'),feed=document.getElementById('feed'),
+      hint=document.getElementById('hint'),wheel=document.getElementById('wheel'),
+      btnNew=document.getElementById('btnNew'),btnAgain=document.getElementById('btnAgain'),
+      btnSound=document.getElementById('btnSound'),btnAuto=document.getElementById('btnAuto'),
+      winBox=document.getElementById('winBox'),
+      drawEv=document.getElementById('drawEv'),drawDs=document.getElementById('drawDs'),
+      drawLbl=document.getElementById('drawLbl'),
+      connPill=document.getElementById('connPill'),connPillText=document.getElementById('connPillText'),
+      connText=document.getElementById('connText'),offlineBox=document.getElementById('offlineBox'),
+      hubStatus=document.getElementById('hubStatus'),
+      btnCheck=document.getElementById('btnCheck'),checkLine=document.getElementById('checkLine'),
+      connAge=document.getElementById('connAge');
+
+  var card=[],fired={},marked={},history=[],won=false,winLines=[],
+      score=0,bingoCount=0,cardCounter=0,soundOn=true,autoMark=true,rotation=0,audioCtx=null;
+  var snap=null,prevSnap=null,baseSnap=null,conn='connecting',lastOkAt=null,fetching=false;
+  var lastMs=null,failCount=0,pendingCheck=false;
+  var runStartAt=null,idleStartAt=null,startsCount=0;
+
+  function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+  function fmt(n){return Number(n).toLocaleString('en-US');}
+  function beep(freq,dur,type){
+    if(!soundOn)return;
+    try{
+      if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+      if(audioCtx.state==='suspended')audioCtx.resume();
+      var o=audioCtx.createOscillator(),g=audioCtx.createGain();
+      o.type=type||'sine';o.frequency.value=freq;
+      g.gain.setValueAtTime(.12,audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+(dur||.15));
+      o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+(dur||.15));
+    }catch(e){}
+  }
+  function fanfare(){beep(523,.16,'triangle');setTimeout(function(){beep(659,.16,'triangle');},140);setTimeout(function(){beep(784,.3,'triangle');},280);}
+
+  function normalize(j){
+    var m=j.measurement||{}, a=(j.builder&&j.builder.anchor)||{}, o=(j.oracle&&j.oracle.latestClosure)||null;
+    var st=String(m.coreStatus||'');
+    if(st!=='IDLE'&&st!=='RUNNING') return null;
+    return {
+      status:st,
+      rpmMilli:Number(m.rpmMilli||0), rpm:Number(m.rpmMilli||0)/1000,
+      speed:Number(m.speedMmPerSecond||0),
+      dist:Number(m.distanceMm||0),
+      work:parseInt(m.cumulativeWorkUnits,10)||0,
+      block:parseInt(a.blockHeight,10)||0,
+      settled:parseInt(a.settledThroughRound,10)||0,
+      closureSig:o?String(o.firstRound)+'-'+String(o.lastRound)+'@'+String(o.acceptedAt||''):'',
+      closureFirst:o?o.firstRound:null, closureLast:o?o.lastRound:null,
+      closureAt:o?o.acceptedAt:null,
+      freshness:String(m.freshness||''),
+      staleAfter:Number(m.staleAfterSeconds||0),
+      observedAt:m.observedAt||j.generatedAt||null
+    };
+  }
+
+  function setConn(state,detail){
+    conn=state;
+    connPill.className='pill'+(state==='live'?' live':state==='offline'?' offline':'');
+    connPillText.textContent=state==='live'?'Live':state==='offline'?'Offline':'Connecting';
+    offlineBox.classList.toggle('show',state==='offline');
+    if(state==='live'){
+      connText.innerHTML='Live — polling <code>api.squeekchain.com/v1/status</code> every 5 seconds. Last update: '+(lastOkAt?lastOkAt.toLocaleTimeString('en-GB'):'—')+'.';
+    }else if(state==='offline'){
+      connText.innerHTML='The live feed is unreachable. Retrying every 5 seconds — no events are being faked in the meantime.'+(detail?' ('+String(detail).replace(/[<>&"]/g,'')+')':'')+(failCount>1?' Failed attempts so far: '+failCount+'.':'')+(lastOkAt?' Last successful update: '+lastOkAt.toLocaleTimeString('en-GB')+'.':' It has not connected yet on this visit.');
+    }else{
+      connText.innerHTML='Contacting <code>api.squeekchain.com/v1/status</code> — the game polls the live wheel every 5 seconds.';
+    }
+  }
+
+  function renderTelemetry(){
+    if(!snap){
+      hubStatus.textContent=conn==='offline'?'OFFLINE':'CONNECTING';hubStatus.className='';
+      return;
+    }
+    document.getElementById('tStatus').textContent=snap.status;
+    document.getElementById('tRpm').textContent=snap.rpm.toFixed(1)+' RPM';
+    document.getElementById('tSpeed').textContent=fmt(snap.speed)+' mm/s';
+    document.getElementById('tDist').textContent=(snap.dist/1000000).toFixed(3)+' km';
+    document.getElementById('tWork').textContent=fmt(snap.work);
+    document.getElementById('tBlock').textContent=fmt(snap.block);
+    document.getElementById('tSettled').textContent=fmt(snap.settled);
+    document.getElementById('tClosure').textContent=snap.closureLast?('Rounds '+snap.closureFirst+'–'+snap.closureLast):'None yet';
+    document.getElementById('tClosureAt').textContent=snap.closureAt?('Accepted '+new Date(snap.closureAt).toLocaleString('en-GB')):'';
+    document.getElementById('tFresh').textContent=snap.observedAt?new Date(snap.observedAt).toLocaleString('en-GB'):'—';
+    document.getElementById('tFreshSub').textContent='The wheel hardware reports freshness: '+(snap.freshness||'unknown')+(snap.staleAfter?' · its data counts as stale after '+snap.staleAfter+' s without an update':'');
+    hubStatus.textContent=snap.status;
+    hubStatus.className=snap.status==='RUNNING'?'run':'';
+  }
+
+  function newCard(){
+    cardCounter++;
+    var picks=shuffle(DEFS.slice()).slice(0,24);
+    card=[];var p=0;
+    for(var i=0;i<25;i++){
+      if(i===12)card.push({k:'free',s:'SQUEEK!',f:'Free Space — SQUEEK!',i:'🐹',free:true});
+      else card.push(picks[p++]);
+    }
+    fired={};marked={12:true};history=[];won=false;winLines=[];
+    baseSnap=snap||null; startsCount=0;
+    var now=Date.now();
+    runStartAt=(snap&&snap.status==='RUNNING')?now:null;
+    idleStartAt=(snap&&snap.status==='IDLE')?now:null;
+    document.getElementById('cardNo').textContent='#'+String(cardCounter).padStart(3,'0');
+    drawLbl.textContent='Latest live event';
+    drawEv.textContent='Waiting for the wheel…';
+    drawDs.textContent='No live event yet on this card. Events fire only when the real data changes — a run starting, RPM or speed crossing a threshold, work hitting a milestone, a new block, a settled round, or a fresh oracle closure.';
+    winBox.classList.remove('show');
+    render();updateHint();
+  }
+
+  function render(){
+    grid.innerHTML='';
+    card.forEach(function(ev,i){
+      var d=document.createElement('div');
+      d.className='cell';d.setAttribute('role','gridcell');
+      if(ev.free)d.classList.add('free');
+      if(marked[i])d.classList.add('marked');
+      if(winLines.indexOf(i)>-1)d.classList.add('win');
+      var ready=ev.k&&fired[ev.k]&&!marked[i];
+      if(ready&&!won)d.classList.add('avail');
+      d.innerHTML='<span class="ic" aria-hidden="true">'+ev.i+'</span><span class="tx">'+ev.s+'</span>';
+      d.setAttribute('aria-label',ev.f+(marked[i]?' — marked':ready?' — live event happened, tap to mark':''));
+      if(ready&&!won){d.tabIndex=0;d.addEventListener('click',function(){mark(i);});d.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();mark(i);}});}
+      grid.appendChild(d);
+    });
+    document.getElementById('stDraws').textContent=history.length;
+    document.getElementById('stMarked').textContent=Object.keys(marked).length+' / 25';
+    document.getElementById('stScore').textContent=score;
+    document.getElementById('stBingo').textContent=bingoCount;
+    if(!history.length){feed.innerHTML='<span class="empty">No live events yet. They appear here the moment the real wheel data triggers one.</span>';}
+    else{
+      feed.innerHTML='';
+      history.slice().reverse().forEach(function(h,idx){
+        var c=document.createElement('span');c.className='chip';
+        if(idx===0)c.classList.add('latest');
+        if(card.some(function(x){return x.k===h.def.k;}))c.classList.add('oncard');
+        c.textContent=h.def.i+' '+h.def.s+' · '+h.at;
+        c.title=h.detail;
+        feed.appendChild(c);
+      });
+    }
+  }
+
+  function closestLine(){
+    var best=0;
+    LINES.forEach(function(L){var n=L.filter(function(i){return marked[i];}).length;if(n>best)best=n;});
+    return best;
+  }
+  function updateHint(){
+    if(won)return;
+    var ready=card.filter(function(ev){return ev.k&&fired[ev.k]&&!marked[card.indexOf(ev)];});
+    var cl=closestLine();
+    if(conn==='offline'){
+      hint.innerHTML='📴 <strong>Offline:</strong> the live feed is unreachable, so the game is paused honestly — no simulated events. It reconnects on its own.';
+    }else if(ready.length){
+      hint.innerHTML='👉 <strong>'+ready.length+' square'+(ready.length>1?'s':'')+' lit up</strong> from live events — tap to mark. Closest line: <strong>'+cl+'/5</strong>.';
+    }else if(history.length){
+      hint.innerHTML='🎯 Closest line: <strong>'+cl+'/5</strong>. No lit squares right now — the next real change in the wheel data may light one up.';
+    }else if(conn==='live'){
+      hint.innerHTML='🎯 <strong>Live and watching:</strong> the wheel is currently <strong>'+(snap?snap.status:'—')+'</strong>. When a real event on your card happens, its square lights up'+(autoMark?' and is auto-marked':'')+'.';
+    }else{
+      hint.innerHTML='🎯 <strong>Waiting for live data:</strong> once the wheel feed connects, real events will light up squares on your card.';
+    }
+  }
+
+  function checkWin(){
+    var wins=LINES.filter(function(L){return L.every(function(i){return marked[i];});});
+    if(wins.length&&!won){
+      won=true;winLines=[];wins.forEach(function(L){L.forEach(function(i){if(winLines.indexOf(i)<0)winLines.push(i);});});
+      bingoCount++;
+      var bonus=Math.max(0,(30-history.length))*5+100;
+      var full=Object.keys(marked).length===25;
+      if(full)bonus+=250;
+      score+=bonus;fanfare();confetti();
+      document.getElementById('winText').textContent=(full?'FULL CARD! ':'')+'You completed '+wins.length+' line'+(wins.length>1?'s':'')+' after '+history.length+' live events. BINGO bonus: +'+bonus+' points. Total score: '+score+'.';
+      winBox.classList.add('show');
+      hint.innerHTML='🏆 <strong>BINGO!</strong> Line completed after '+history.length+' live events. Press “Play a New Card” for the next round.';
+    }
+  }
+  function confetti(){
+    var colors=['#E85D26','#F2B134','#0F766E','#FDBA74','#84CC16'];
+    for(var i=0;i<36;i++){
+      var s=document.createElement('span');s.className='confetti';
+      s.style.left=(Math.random()*100)+'%';s.style.background=colors[i%colors.length];
+      s.style.animationDuration=(1+Math.random()*1.2)+'s';s.style.animationDelay=(Math.random()*.4)+'s';
+      winBox.appendChild(s);(function(el){setTimeout(function(){el.remove();},2800);})(s);
+    }
+  }
+
+  function mark(i){
+    if(marked[i]||won)return;
+    marked[i]=true;score+=10;beep(880,.1,'sine');
+    render();checkWin();render();updateHint();
+  }
+
+  function fireEvent(def,ctx){
+    fired[def.k]=true;
+    var detail='';try{detail=def.d(ctx);}catch(e){detail=def.f;}
+    var at=new Date().toLocaleTimeString('en-GB');
+    history.push({def:def,detail:detail,at:at});
+    drawLbl.textContent='Live event #'+history.length+' · '+at;
+    drawEv.textContent=def.i+' '+def.f;
+    var idx=card.findIndex(function(x){return x.k===def.k;});
+    if(idx>-1&&!marked[idx]){
+      drawDs.textContent=detail+' It is on your card — the square is lit up!';
+      beep(660,.14,'triangle');
+      if(autoMark&&!won){(function(ix){setTimeout(function(){mark(ix);},400);})(idx);}
+    }else if(idx>-1){
+      drawDs.textContent=detail+' Already marked on your card.';
+    }else{
+      drawDs.textContent=detail+' Not on this card, but it counts in the event history.';
+      beep(520,.1,'sine');
+    }
+    render();updateHint();
+  }
+
+  function evaluate(curr){
+    var now=Date.now();
+    if(curr.status==='RUNNING'){
+      if(prevSnap&&prevSnap.status==='IDLE')startsCount++;
+      if(!runStartAt)runStartAt=now;
+      idleStartAt=null;
+    }else{
+      if(!idleStartAt)idleStartAt=now;
+      runStartAt=null;
+    }
+    var ctx={
+      prev:prevSnap,curr:curr,base:baseSnap,
+      starts:startsCount,
+      runSecs:runStartAt?(now-runStartAt)/1000:0,
+      idleSecs:idleStartAt?(now-idleStartAt)/1000:0
+    };
+    // The wheel graphic turns with the real distance counter.
+    if(prevSnap&&curr.dist>prevSnap.dist){
+      rotation+=(curr.dist-prevSnap.dist)*0.18;
+      wheel.style.transform='rotate('+rotation+'deg)';
+    }
+    if(won)return;
+    DEFS.forEach(function(def){
+      if(fired[def.k])return;
+      var hit=false;try{hit=def.test(ctx);}catch(e){hit=false;}
+      if(hit)fireEvent(def,ctx);
+    });
+  }
+
+  function fetchStatus(){
+    return new Promise(function(resolve,reject){
+      var ctrl=('AbortController' in window)?new AbortController():null;
+      var timer=ctrl?setTimeout(function(){try{ctrl.abort();}catch(e){}},8000):null;
+      function done(){if(timer)clearTimeout(timer);}
+      fetch(API_URL,ctrl?{cache:'no-store',signal:ctrl.signal}:{cache:'no-store'})
+        .then(function(r){if(!r.ok){done();throw new Error('HTTP '+r.status);}return r.json();})
+        .then(function(j){done();resolve(j);})
+        .catch(function(err){done();reject(err);});
+    });
+  }
+
+  function reportCheck(ok,ms,errMsg){
+    var now=new Date().toLocaleTimeString('en-GB');
+    if(ok){
+      checkLine.innerHTML='<strong class="ok">✓ LIVE</strong> — checked at '+now+': the Squeekchain API answered in '+ms+' ms, and the wheel data on this page is real and current. The quick test any time: green LIVE pill + a “last update” time only a few seconds old.';
+    }else{
+      checkLine.innerHTML='<strong class="bad">✗ OFFLINE</strong> — checked at '+now+': the API could not be reached from this device'+(errMsg?' ('+String(errMsg).replace(/[<>&"]/g,'')+')':'')+'. Either the API is down or this connection to it is blocked. Nothing on the card is faked — the game keeps retrying every 5 seconds and recovers by itself.';
+    }
+  }
+
+  function poll(){
+    if(fetching)return;
+    fetching=true;
+    var t0=Date.now();
+    fetchStatus()
+      .then(function(j){
+        fetching=false;
+        var curr=normalize(j);
+        if(!curr){failCount++;setConn('offline','unexpected response shape');renderTelemetry();updateHint();if(pendingCheck){pendingCheck=false;reportCheck(false,null,'unexpected response shape');}return;}
+        var reconnected=(conn==='offline');
+        prevSnap=snap;
+        snap=curr;
+        if(!baseSnap)baseSnap=curr;
+        lastOkAt=new Date();lastMs=Date.now()-t0;failCount=0;
+        setConn('live');renderTelemetry();
+        if(pendingCheck){pendingCheck=false;reportCheck(true,lastMs,null);}
+        if(reconnected){prevSnap=curr;updateHint();return;}
+        evaluate(curr);
+        render();updateHint();
+      })
+      .catch(function(err){
+        fetching=false;
+        failCount++;
+        var msg=err&&err.name==='AbortError'?'request timed out after 8 s':(err&&err.message?err.message:'network error');
+        setConn('offline',msg);
+        renderTelemetry();updateHint();
+        if(pendingCheck){pendingCheck=false;reportCheck(false,null,msg);}
+      });
+  }
+
+  btnCheck.addEventListener('click',function(){
+    checkLine.innerHTML='<strong>Checking…</strong> contacting <code>api.squeekchain.com/v1/status</code> right now.';
+    pendingCheck=true;
+    if(!fetching)poll();
+  });
+  btnNew.addEventListener('click',function(){beep(440,.08);newCard();});
+  btnAgain.addEventListener('click',function(){newCard();window.scrollTo({top:0,behavior:'smooth'});});
+  btnSound.addEventListener('click',function(){soundOn=!soundOn;this.textContent=soundOn?'🔊 Sound: On':'🔇 Sound: Off';this.classList.toggle('on',soundOn);if(soundOn)beep(660,.1);});
+  btnAuto.addEventListener('click',function(){
+    autoMark=!autoMark;this.textContent=autoMark?'Auto-mark: On':'Auto-mark: Off';this.classList.toggle('on',autoMark);
+    if(autoMark){card.forEach(function(ev,i){if(ev.k&&fired[ev.k]&&!marked[i])mark(i);});}
+    updateHint();
+  });
+
+  newCard();
+  setConn('connecting');
+  poll();
+  setInterval(poll,POLL_MS);
+  setInterval(function(){
+    if(!lastOkAt){connAge.textContent=conn==='offline'?'No successful update yet':'';return;}
+    var age=Math.max(0,Math.round((Date.now()-lastOkAt.getTime())/1000));
+    connAge.textContent='Last update '+age+' s ago';
+    var stale=conn==='live'&&age>20;
+    connAge.classList.toggle('stale',stale);
+    if(stale)connAge.textContent+=' — no fresh data, the connection may have dropped';
+  },1000);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)poll();});
+  window.addEventListener('online',function(){poll();});
+})();
+</script>
+</body>
+</html>
